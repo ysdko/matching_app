@@ -1,0 +1,6 @@
+[submodule "api"]
+  path = api
+  url = https://github.com/ysdko/matching_app_api
+[submodule "front"]
+  path = front
+  url = https://github.com/ysdko/matching_app_front
