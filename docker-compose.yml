@@ -1,14 +1,27 @@
 version: '3.8'
 
 services:
+  waitfordb:
+      image: dadarek/wait-for-dependencies
+      depends_on:
+        - db
+      command: db:5432
+
   db:
     image: postgres:12.3-alpine
     environment:
       TZ: UTC
       PGTZ: UTC
       POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+      # - POSTGRES_HOST_AUTH_METHOD=trust
+    # volumes:
+    #   - ./api:/tmp/db/data
     volumes:
-      - ./api/tmp/data
+      - ./tmp/db:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    # ports:
+    #   - 5433:5432
 
   api:
     build:
@@ -17,12 +30,15 @@ services:
         WORKDIR: $WORKDIR
     environment:
       POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+      API_DOMAIN: "localhost:8080"
     volumes:
       - ./api:/$WORKDIR
     depends_on:
       - db
+    # command: /bin/sh -c "rm -f tmp/pids/server.pid && bundle exec rails db:create && bundle exec rails db:migrate && bundle exec rails s -p 3000 -b '0.0.0.0'"
     ports:
       - "$API_PORT:$CONTAINER_PORT"
+    # command: /wait-for-it.sh db:5432
 
   front:
     build:
@@ -30,6 +46,7 @@ services:
       args:
         WORKDIR: $WORKDIR
         CONTAINER_PORT: $CONTAINER_PORT
+        API_URL: "http://localhost:3000"
     command: yarn run dev
     volumes:
       - ./front:/$WORKDIR
@@ -37,3 +54,6 @@ services:
       - "$FRONT_PORT:$CONTAINER_PORT"
     depends_on:
       - api
+
+# volumes:
+#   postgresql-data:
