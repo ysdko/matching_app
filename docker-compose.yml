@@ -1,22 +1,17 @@
 version: '3.8'
 
 services:
-  waitfordb:
-      image: dadarek/wait-for-dependencies
-      depends_on:
-        - db
-      command: db:5432
 
   db:
     image: postgres:12.3-alpine
+    ports:
+      - "5432:5432"
     environment:
       TZ: UTC
       PGTZ: UTC
       POSTGRES_PASSWORD: $POSTGRES_PASSWORD
     volumes:
       - ./tmp/db:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
 
   api:
     build:
